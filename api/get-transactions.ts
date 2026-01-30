@@ -1,9 +1,15 @@
 import { google } from "googleapis"
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 
-const SHEET_ID = process.env.GOOGLE_SHEET_ID!
-const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL!
-const PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, "\n")
+const SHEET_ID = process.env.GOOGLE_SHEET_ID
+const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL
+const RAW_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY
+
+if (!SHEET_ID || !CLIENT_EMAIL || !RAW_PRIVATE_KEY) {
+  throw new Error("Missing Google Sheets environment variables")
+}
+
+const PRIVATE_KEY = RAW_PRIVATE_KEY.replace(/\\n/g, "\n")
 
 export default async function handler(
   req: VercelRequest,
