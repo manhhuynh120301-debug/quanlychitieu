@@ -1,6 +1,16 @@
 import { google } from "googleapis"
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 
+const SHEET_ID = process.env.GOOGLE_SHEET_ID
+const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL
+const RAW_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY
+
+if (!SHEET_ID || !CLIENT_EMAIL || !RAW_PRIVATE_KEY) {
+  throw new Error("Missing Google Sheets environment variables")
+}
+
+const PRIVATE_KEY = RAW_PRIVATE_KEY.replace(/\\n/g, "\n")
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -17,16 +27,16 @@ export default async function handler(
     }
 
     const auth = new google.auth.JWT(
-      process.env.GOOGLE_CLIENT_EMAIL,
+      CLIENT_EMAIL,
       undefined,
-      process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      PRIVATE_KEY,
       ["https://www.googleapis.com/auth/spreadsheets"]
     )
 
     const sheets = google.sheets({ version: "v4", auth })
 
     await sheets.spreadsheets.values.append({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      spreadsheetId: SHEET_ID,
       range: "Transactions!A:C",
       valueInputOption: "USER_ENTERED",
       requestBody: {
